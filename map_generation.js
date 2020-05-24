@@ -8,12 +8,28 @@ GRID_SIZE = 20;
 CELL_WIDTH = 1920;
 CELL_HEIGHT = 1080;
 
+GLOBAL_VISITED_ARRAY = []
+
 class Intersection {
 	constructor(x, y, i) {
 		this.x = x;
 		this.y = y;
 		this.i = i;
 		this.neighbors = [];
+	}
+
+	dfs_traverse(this_component_list){
+		if (GLOBAL_VISITED_ARRAY[this.i] == 1) {
+			return;
+		}
+
+		GLOBAL_VISITED_ARRAY[this.i] = 1;
+		this_component_list.push(this.i);
+
+		for (var i = 0; i < this.neighbors.length; i++) {
+			this_component_list.concat(this.neighbors[i].dfs_traverse(this_component_list));
+		}
+		return this_component_list;
 	}
 }
 
