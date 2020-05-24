@@ -33,6 +33,26 @@ class Intersection {
 	}
 }
 
+class Neighborhood {
+	constructor(indexes, node_list) {
+
+		this.node_list = [];
+
+		let xsum = 0;
+		let ysum = 0;
+
+		for (var i = 0; i < indexes.length; i++) {
+			xsum += node_list[indexes[i]].x;
+			ysum += node_list[indexes[i]].y;
+			this.node_list.push(node_list[indexes[i]]);
+		}
+
+		// To be renamed with centroid prefix
+		this.x = int(xsum / indexes.length);
+		this.y = int(ysum / indexes.length);
+	}
+}
+
 class Cell {
 	// This class is the primary rendering unit.
 	// All world data will be created in units of cells.
