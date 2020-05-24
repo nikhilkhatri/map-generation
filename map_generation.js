@@ -183,6 +183,22 @@ class Cell {
 
 }
 
+function find_connected_components(node_list) {
+	let n_nodes = node_list.length;
+	GLOBAL_VISITED_ARRAY = new Array(n_nodes).fill(0);
+	let connected_component_list = []
+	for (var i=0; i<n_nodes; i++) {
+		if (GLOBAL_VISITED_ARRAY[i] != 1){
+
+			var this_component_list = this_component_list = node_list[i].dfs_traverse([]);
+			if (this_component_list.length > 1){
+				connected_component_list.push(this_component_list);
+			}
+		}
+	}
+	return connected_component_list;
+}
+
 document.onkeypress = function() {
 	if (key == 'w') { // W
 		global_Y -= 2*GRID_SIZE;
