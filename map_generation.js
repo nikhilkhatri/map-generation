@@ -75,6 +75,8 @@ class Cell {
 
 		this.intersections = [];  // Array of [x, y] arrays
 		this.grid_roads = [];  // Array of [[x1, y1], [x2, y2]] (start coords, end coords) arrays
+
+		this.neighborhoods = [];
 	}
 
 	create_intersections() {
@@ -137,6 +139,15 @@ class Cell {
 					this.intersections[j].neighbors.push(this.intersections[i]);
 				}
 			}
+		}
+
+		// Grid created.
+		// Finding neighbors now
+
+		let neighborhood_list = find_connected_components(this.intersections);
+
+		for (var i = 0; i < neighborhood_list.length; i++) {
+			this.neighborhoods.push(new Neighborhood(neighborhood_list[i], this.intersections));
 		}
 	}
 
