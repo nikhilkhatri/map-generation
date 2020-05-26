@@ -60,7 +60,7 @@ class Cell {
 	//  1. Intersection creation
 	//  2. Urban road generation
 	//  3. Finding connected components
-	//  4. Border intersection creation : TODO
+	//  4. Border intersection creation
 	//  5. Network creation : TODO
 	//  6. 2D world rendering
 
@@ -77,6 +77,7 @@ class Cell {
 		this.grid_roads = [];  // Array of [[x1, y1], [x2, y2]] (start coords, end coords) arrays
 
 		this.neighborhoods = [];
+		this.border_intersections = [];
 		this.long_roads = [];
 	}
 
@@ -152,6 +153,44 @@ class Cell {
 		}
 	}
 
+	create_border_intersections(){
+		// For each of the 4 borders, calculate how many intersections there should be,
+		// and their locations
+		// Max 4 intersections per border.
+
+		// For each edge, we use coords of the midpoint, so that adjacent cells' border intersections match up
+
+		let border_scale = 302;
+
+		// TOP
+		let num_border_ints = floor(5 * noise((this.world_x + this.width/2)/border_scale, this.world_y/border_scale));
+		for (var i = 0; i < num_border_ints; i++) {
+			let this_x = floor(this.width * noise((this.world_x + this.width/2)/border_scale, this.world_y/border_scale, i));
+			this.border_intersections.push(new Intersection(this_x, 0, this.border_intersections.length));
+		}
+
+		// BOTTOM
+		num_border_ints = floor(5 * noise((this.world_x + this.width/2)/border_scale, (this.world_y+this.height)/border_scale));
+		for (var i = 0; i < num_border_ints; i++) {
+			let this_x = floor(this.width * noise((this.world_x+this.width/2)/border_scale, (this.world_y+this.height)/border_scale, i));
+			this.border_intersections.push(new Intersection(this_x, this.height, this.border_intersections.length));
+		}
+
+		// LEFT
+		num_border_ints = floor(5 * noise((this.world_x)/border_scale, (this.world_y+this.height/2)/border_scale));
+		for (var i = 0; i < num_border_ints; i++) {
+			let this_y = floor(this.height * noise((this.world_x)/border_scale, (this.world_y+this.height/2)/border_scale, i));
+			this.border_intersections.push(new Intersection(0, this_y, this.border_intersections.length));
+		}
+
+		// RIGHT
+		num_border_ints = floor(5 * noise((this.world_x+this.width)/border_scale, (this.world_y+this.height/2)/border_scale));
+		for (var i = 0; i < num_border_ints; i++) {
+			let this_y = floor(this.height * noise((this.world_x+this.width)/border_scale, (this.world_y+this.height/2)/border_scale, i));
+			this.border_intersections.push(new Intersection(this.width, this_y, this.border_intersections.length));
+		}
+	}
+
 	create_long_roads(){
 		// Check 0: Is your new algorithm for this functionality NP Hard/Complete?
 
@@ -160,7 +199,7 @@ class Cell {
 
 		// Connect each neighborhood to the closest unvisited neighborhood to its right
 
-		// TODO: Provide a 2 line proof that this creates a spanning tree
+		// TODO: Provide a 2 line proof that this creates a spanning tree (within the cell)
 		let visited_array = new Array(this.neighborhoods.length).fill(false);
 		for (var i = 0; i < this.neighborhoods.length; i++) {
 			let my_j = -1;
@@ -181,6 +220,27 @@ class Cell {
 				visited_array[my_j] = true;
 			}
 		}
+
+		// Connect each border intersection to its nearest neighbor
+		// TODO: Show that this, combined with the previous TODO proof, gives a world that's fully connected
+		for (var i = 0; i < this.border_intersections.length; i++) {
+
+			let min_dist = Infinity;
+			let my_j = -1;
+			for (var j = 0; j < this.intersections.length; j++) {
+				let this_dist = dist(this.border_intersections[i].x, this.border_intersections[i].y,
+									 this.intersections[j].x, this.intersections[j].y);
+				if ((this.intersections[j].neighbors.length > 0) && (this_dist < min_dist)) {
+					min_dist = this_dist;
+					my_j = j;
+				}
+			}
+			if (my_j > -1) {
+				this.long_roads.push([[this.intersections[my_j].x, this.intersections[my_j].y],
+									  [this.border_intersections[i].x, this.border_intersections[i].y]]);
+			}
+		}
+
 	}
 
 	plot_grids(){
@@ -213,6 +273,14 @@ class Cell {
 						this.world_y - global_Y + this.intersections[i].y,
 						4);
 			}
+		}
+
+		fill("#f75");
+		// border intersections
+		for (var i = 0; i < this.border_intersections.length; i++) {
+			circle(	this.world_x - global_X + this.border_intersections[i].x, 
+					this.world_y - global_Y + this.border_intersections[i].y,
+					8);
 		}
 	}
 
@@ -331,6 +399,7 @@ function draw() {
 	// cell0 = new Cell(0, 0, CELL_WIDTH, CELL_HEIGHT);
 	// cell0.create_intersections();
 	// cell0.create_neighborhoods();
+	// cell0.create_border_intersections();
 	// cell0.create_long_roads();
 	// cell0.plot_grids();
 
@@ -339,6 +408,7 @@ function draw() {
 	for (var i = 0; i < cells.length; i++) {
 		cells[i].create_intersections();
 		cells[i].create_neighborhoods();
+		cells[i].create_border_intersections();
 		cells[i].create_long_roads();
 		cells[i].plot_grids();
 	}
