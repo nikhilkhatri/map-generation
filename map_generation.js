@@ -253,6 +253,14 @@ class Cell {
 						4);
 			}
 		}
+
+		fill("#f75");
+		// border intersections
+		for (var i = 0; i < this.border_intersections.length; i++) {
+			circle(	this.world_x - global_X + this.border_intersections[i].x, 
+					this.world_y - global_Y + this.border_intersections[i].y,
+					8);
+		}
 	}
 
 	static generate_onscreen_cells() {
