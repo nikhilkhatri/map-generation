@@ -187,15 +187,26 @@ class Cell {
 		strokeWeight(2);
 		stroke("#777");
 
+		// grid-roads
 		for (var i = 0; i < this.grid_roads.length; i++) {
 			line(this.world_x - global_X + this.grid_roads[i][0][0], 
 				 this.world_y - global_Y + this.grid_roads[i][0][1],
 				 this.world_x - global_X + this.grid_roads[i][1][0],
 				 this.world_y - global_Y + this.grid_roads[i][1][1]);
 		}
+
+		// long-roads
+		for (var i = 0; i < this.long_roads.length; i++) {
+			line(this.world_x - global_X + this.long_roads[i][0][0], 
+				 this.world_y - global_Y + this.long_roads[i][0][1],
+				 this.world_x - global_X + this.long_roads[i][1][0],
+				 this.world_y - global_Y + this.long_roads[i][1][1]);
+		}
+
 		noStroke();
 		fill("#f55");
 
+		// intersections
 		for (var i = 0; i < this.intersections.length; i++) {
 			if (this.intersections[i].neighbors.length > 0){
 				circle(	this.world_x - global_X + this.intersections[i].x, 
