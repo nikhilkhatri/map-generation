@@ -199,7 +199,7 @@ class Cell {
 
 		// Connect each neighborhood to the closest unvisited neighborhood to its right
 
-		// TODO: Provide a 2 line proof that this creates a spanning tree
+		// TODO: Provide a 2 line proof that this creates a spanning tree (within the cell)
 		let visited_array = new Array(this.neighborhoods.length).fill(false);
 		for (var i = 0; i < this.neighborhoods.length; i++) {
 			let my_j = -1;
@@ -220,6 +220,27 @@ class Cell {
 				visited_array[my_j] = true;
 			}
 		}
+
+		// Connect each border intersection to its nearest neighbor
+		// TODO: Show that this, combined with the previous TODO proof, gives a world that's fully connected
+		for (var i = 0; i < this.border_intersections.length; i++) {
+
+			let min_dist = Infinity;
+			let my_j = -1;
+			for (var j = 0; j < this.intersections.length; j++) {
+				let this_dist = dist(this.border_intersections[i].x, this.border_intersections[i].y,
+									 this.intersections[j].x, this.intersections[j].y);
+				if ((this.intersections[j].neighbors.length > 0) && (this_dist < min_dist)) {
+					min_dist = this_dist;
+					my_j = j;
+				}
+			}
+			if (my_j > -1) {
+				this.long_roads.push([[this.intersections[my_j].x, this.intersections[my_j].y],
+									  [this.border_intersections[i].x, this.border_intersections[i].y]]);
+			}
+		}
+
 	}
 
 	plot_grids(){
