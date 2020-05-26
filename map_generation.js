@@ -59,7 +59,7 @@ class Cell {
 	// This includes:
 	//  1. Intersection creation
 	//  2. Urban road generation
-	//  3. Finding connected components : TODO
+	//  3. Finding connected components
 	//  4. Border intersection creation : TODO
 	//  5. Network creation : TODO
 	//  6. 2D world rendering
@@ -77,6 +77,7 @@ class Cell {
 		this.grid_roads = [];  // Array of [[x1, y1], [x2, y2]] (start coords, end coords) arrays
 
 		this.neighborhoods = [];
+		this.long_roads = [];
 	}
 
 	create_intersections() {
@@ -151,6 +152,37 @@ class Cell {
 		}
 	}
 
+	create_long_roads(){
+		// Check 0: Is your new algorithm for this functionality NP Hard/Complete?
+
+		// First sort neighborhoods by centroid X coord
+		this.neighborhoods.sort(x_comparator);
+
+		// Connect each neighborhood to the closest unvisited neighborhood to its right
+
+		// TODO: Provide a 2 line proof that this creates a spanning tree
+		let visited_array = new Array(this.neighborhoods.length).fill(false);
+		for (var i = 0; i < this.neighborhoods.length; i++) {
+			let my_j = -1;
+			let lowest_dist = Infinity;
+			for (var j = i+1; j < this.neighborhoods.length; j++) {
+				let this_dist = dist(this.neighborhoods[i].x, this.neighborhoods[i].y, 
+									 this.neighborhoods[j].x, this.neighborhoods[j].y)
+				
+				if ((!visited_array[j]) && (this_dist < lowest_dist)){
+					my_j = j;
+					lowest_dist = this_dist;
+				}
+			}
+			if (my_j != -1) {
+				// Connect the 2 selected neighborhoods through the shortest possible path
+				this.long_roads.push(Cell.get_closest_points(this.neighborhoods[i], this.neighborhoods[my_j]));
+				visited_array[i] = true;
+				visited_array[my_j] = true;
+			}
+		}
+	}
+
 	plot_grids(){
 		strokeWeight(2);
 		stroke("#777");
@@ -212,6 +244,28 @@ class Cell {
 		return(theta);
 	}
 
+	static get_closest_points(na, nb) {
+		// na and nb should be Neighborhood objects
+
+		let lowest_dist = Infinity;
+		let chosen_a = [];
+		let chosen_b = [];
+
+		// BRUTE
+		for (var i = 0; i < na.node_list.length; i++) {
+			for (var j = 0; j < nb.node_list.length; j++) {
+				let this_dist = dist(na.node_list[i].x, na.node_list[i].y,
+								 nb.node_list[j].x, nb.node_list[j].y);
+				if (this_dist < lowest_dist) {
+					lowest_dist = this_dist;
+					chosen_a = [na.node_list[i].x, na.node_list[i].y];
+					chosen_b = [nb.node_list[j].x, nb.node_list[j].y];
+				}
+			}
+		}
+		return [chosen_a, chosen_b];
+	}
+
 }
 
 function find_connected_components(node_list) {
@@ -228,6 +282,10 @@ function find_connected_components(node_list) {
 		}
 	}
 	return connected_component_list;
+}
+
+function x_comparator(a, b){
+	return a.x - b.x;
 }
 
 document.onkeypress = function() {
@@ -262,6 +320,7 @@ function draw() {
 	// cell0 = new Cell(0, 0, CELL_WIDTH, CELL_HEIGHT);
 	// cell0.create_intersections();
 	// cell0.create_neighborhoods();
+	// cell0.create_long_roads();
 	// cell0.plot_grids();
 
 	cells = Cell.generate_onscreen_cells()
@@ -269,6 +328,7 @@ function draw() {
 	for (var i = 0; i < cells.length; i++) {
 		cells[i].create_intersections();
 		cells[i].create_neighborhoods();
+		cells[i].create_long_roads();
 		cells[i].plot_grids();
 	}
 	document.getElementById("framerate-display").textContent = int(frameRate());
