@@ -8,12 +8,48 @@ GRID_SIZE = 20;
 CELL_WIDTH = 1920;
 CELL_HEIGHT = 1080;
 
+GLOBAL_VISITED_ARRAY = []
+
 class Intersection {
 	constructor(x, y, i) {
 		this.x = x;
 		this.y = y;
 		this.i = i;
 		this.neighbors = [];
+	}
+
+	dfs_traverse(this_component_list){
+		if (GLOBAL_VISITED_ARRAY[this.i] == 1) {
+			return;
+		}
+
+		GLOBAL_VISITED_ARRAY[this.i] = 1;
+		this_component_list.push(this.i);
+
+		for (var i = 0; i < this.neighbors.length; i++) {
+			this_component_list.concat(this.neighbors[i].dfs_traverse(this_component_list));
+		}
+		return this_component_list;
+	}
+}
+
+class Neighborhood {
+	constructor(indexes, node_list) {
+
+		this.node_list = [];
+
+		let xsum = 0;
+		let ysum = 0;
+
+		for (var i = 0; i < indexes.length; i++) {
+			xsum += node_list[indexes[i]].x;
+			ysum += node_list[indexes[i]].y;
+			this.node_list.push(node_list[indexes[i]]);
+		}
+
+		// To be renamed with centroid prefix
+		this.x = int(xsum / indexes.length);
+		this.y = int(ysum / indexes.length);
 	}
 }
 
@@ -39,6 +75,8 @@ class Cell {
 
 		this.intersections = [];  // Array of [x, y] arrays
 		this.grid_roads = [];  // Array of [[x1, y1], [x2, y2]] (start coords, end coords) arrays
+
+		this.neighborhoods = [];
 	}
 
 	create_intersections() {
@@ -101,6 +139,15 @@ class Cell {
 					this.intersections[j].neighbors.push(this.intersections[i]);
 				}
 			}
+		}
+
+		// Grid created.
+		// Finding neighbors now
+
+		let neighborhood_list = find_connected_components(this.intersections);
+
+		for (var i = 0; i < neighborhood_list.length; i++) {
+			this.neighborhoods.push(new Neighborhood(neighborhood_list[i], this.intersections));
 		}
 	}
 
@@ -165,6 +212,22 @@ class Cell {
 		return(theta);
 	}
 
+}
+
+function find_connected_components(node_list) {
+	let n_nodes = node_list.length;
+	GLOBAL_VISITED_ARRAY = new Array(n_nodes).fill(0);
+	let connected_component_list = []
+	for (var i=0; i<n_nodes; i++) {
+		if (GLOBAL_VISITED_ARRAY[i] != 1){
+
+			var this_component_list = this_component_list = node_list[i].dfs_traverse([]);
+			if (this_component_list.length > 1){
+				connected_component_list.push(this_component_list);
+			}
+		}
+	}
+	return connected_component_list;
 }
 
 document.onkeypress = function() {
