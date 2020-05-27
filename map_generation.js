@@ -61,7 +61,7 @@ class Cell {
 	//  2. Urban road generation
 	//  3. Finding connected components
 	//  4. Border intersection creation
-	//  5. Network creation : TODO
+	//  5. Network creation
 	//  6. 2D world rendering
 
 	constructor(x, y, width, height) {
@@ -244,8 +244,25 @@ class Cell {
 	}
 
 	plot_grids(){
-		strokeWeight(2);
-		stroke("#777");
+
+		noStroke();
+
+		// Initial colored background
+		let inv_scale_likelihood = 301;
+		let inv_scale_thresh = 3;
+
+		for (var x = 0; x < this.width; x+=GRID_SIZE) {
+			for (var y = 0; y < this.height; y+=GRID_SIZE) {
+				let likelihood = (100 * noise((this.world_x + x)/inv_scale_likelihood, (this.world_y + y)/inv_scale_likelihood));
+				colorMode(HSB);
+				fill(2.5*likelihood, 100, 120-likelihood);
+				colorMode(RGB);
+
+				rect(this.world_x - global_X + x, this.world_y - global_Y + y, GRID_SIZE, GRID_SIZE);
+			}
+		}
+		strokeWeight(4);
+		stroke("#222");
 		noFill();
 
 		// grid-roads
@@ -292,7 +309,7 @@ class Cell {
 		}
 
 		noStroke();
-		fill("#f55");
+		fill("#222");
 
 		// intersections
 		for (var i = 0; i < this.intersections.length; i++) {
@@ -303,12 +320,11 @@ class Cell {
 			}
 		}
 
-		fill("#f75");
 		// border intersections
 		for (var i = 0; i < this.border_intersections.length; i++) {
 			circle(	this.world_x - global_X + this.border_intersections[i].x, 
 					this.world_y - global_Y + this.border_intersections[i].y,
-					8);
+					6);
 		}
 	}
 
