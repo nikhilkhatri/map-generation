@@ -257,7 +257,6 @@ class Cell {
 		}
 
 		// long-roads
-		let control_points = 5;
 		for (var i = 0; i < this.long_roads.length; i++) {
 
 			let road_len = dist(this.long_roads[i][0][0], this.long_roads[i][0][1],
@@ -265,7 +264,7 @@ class Cell {
 			let rotation_angle = atan2((this.long_roads[i][1][1] - this.long_roads[i][0][1]),
 									  (this.long_roads[i][1][0] - this.long_roads[i][0][0]));
 
-			let step = road_len / control_points;
+			let step = 5 * GRID_SIZE;
 
 			// Save current frame of reference
 			push();
