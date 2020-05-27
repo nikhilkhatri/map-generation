@@ -1,6 +1,8 @@
 # Map-generation
 Algorithms to procedurally generate feasible game maps
 
+![example map](images/example_screenshot_0.png?raw=true "Example procedurally generated map")
+
 ## Goal
 The goal of this project is to procedurally generate road networks that could be used as the basis for an open-world game.
 
