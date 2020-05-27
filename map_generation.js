@@ -246,6 +246,7 @@ class Cell {
 	plot_grids(){
 		strokeWeight(2);
 		stroke("#777");
+		noFill();
 
 		// grid-roads
 		for (var i = 0; i < this.grid_roads.length; i++) {
@@ -256,11 +257,39 @@ class Cell {
 		}
 
 		// long-roads
+		let control_points = 5;
 		for (var i = 0; i < this.long_roads.length; i++) {
-			line(this.world_x - global_X + this.long_roads[i][0][0], 
-				 this.world_y - global_Y + this.long_roads[i][0][1],
-				 this.world_x - global_X + this.long_roads[i][1][0],
-				 this.world_y - global_Y + this.long_roads[i][1][1]);
+
+			let road_len = dist(this.long_roads[i][0][0], this.long_roads[i][0][1],
+								this.long_roads[i][1][0], this.long_roads[i][1][1]);
+			let rotation_angle = atan2((this.long_roads[i][1][1] - this.long_roads[i][0][1]),
+									  (this.long_roads[i][1][0] - this.long_roads[i][0][0]));
+
+			let step = road_len / control_points;
+
+			// Save current frame of reference
+			push();
+
+			// First lets move to the start point:
+			translate(this.world_x - global_X + this.long_roads[i][0][0],
+					  this.world_y - global_Y + this.long_roads[i][0][1]);
+			// Rotate so that the start and end points are connected along the X axis
+			rotate(rotation_angle);
+
+			beginShape();
+			curveVertex(-step,0);
+			curveVertex(0,0);
+			for (var j = step; j < road_len; j+=step) {
+				let this_deviation = (0.1 * road_len) - (0.2 * road_len * noise(this.long_roads[i][0][0], j));
+				curveVertex(j, this_deviation);
+			}
+
+			curveVertex(road_len, 0);
+			curveVertex(road_len+step, 0);
+			endShape();
+
+			// Reset the transformations
+			pop();
 		}
 
 		noStroke();
